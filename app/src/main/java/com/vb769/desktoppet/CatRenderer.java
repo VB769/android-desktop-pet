@@ -7,8 +7,8 @@ final class CatRenderer {
     private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path path=new Path();
     private final Shader fur=new LinearGradient(0, 44, 0, 142,
-        new int[]{0xFFFFFCF6, 0xFFF4E7F4}, null, Shader.TileMode.CLAMP);
-    private static final int OUTLINE=0xFF806B95, LAVENDER=0xFFC1ACED, INK=0xFF51425F;
+        new int[]{0xFFFFFCF6, 0xFFF6EAF2}, null, Shader.TileMode.CLAMP);
+    private static final int OUTLINE=0xFF9B829F, LAVENDER=0xFFC1ACED, INK=0xFF51425F;
 
     private void fill(int color) { p.setShader(null); p.setColor(color); p.setStyle(Paint.Style.FILL); }
     private void stroke(int color, float width) {
@@ -17,11 +17,11 @@ final class CatRenderer {
     }
     private void furPath(Canvas c) {
         fill(Color.WHITE); p.setShader(fur); c.drawPath(path,p);
-        stroke(OUTLINE,1.6f); c.drawPath(path,p);
+        stroke(OUTLINE,2.0f); c.drawPath(path,p);
     }
     private void oval(Canvas c,float l,float t,float r,float b,int color,boolean outline) {
         fill(color); c.drawOval(l,t,r,b,p);
-        if(outline){stroke(OUTLINE,1.5f); c.drawOval(l,t,r,b,p);}
+        if(outline){stroke(OUTLINE,1.8f); c.drawOval(l,t,r,b,p);}
     }
     private void star(Canvas c,float x,float y,float radius,int color) {
         path.reset(); path.moveTo(x,y-radius); path.lineTo(x+radius*.32f,y-radius*.3f);
@@ -37,13 +37,14 @@ final class CatRenderer {
     }
     private void arm(Canvas c,float x,float y,float angle,boolean pads) {
         c.save(); c.rotate(angle,x,y);
-        oval(c,x-7,y-3,x+7,y+24,0xFFFFFAF4,true);
-        oval(c,x-8,y+13,x+8,y+27,0xFFF9F1F5,true);
+        // Short, mitten-shaped paws instead of long articulated legs.
+        oval(c,x-8,y-3,x+8,y+12,0xFFFFFBF5,true);
+        oval(c,x-9,y+4,x+9,y+18,0xFFFFF5F6,true);
         if(pads) {
-            oval(c,x-3.5f,y+20,x+3.5f,y+25,0xFFF1B7CA,false);
-            fill(0xFFF1B7CA); c.drawCircle(x-4,y+18,1.6f,p); c.drawCircle(x,y+16,1.6f,p); c.drawCircle(x+4,y+18,1.6f,p);
+            oval(c,x-4,y+10,x+4,y+15,0xFFF3B6C9,false);
+            fill(0xFFF3B6C9); c.drawCircle(x-4,y+7,1.6f,p); c.drawCircle(x,y+5,1.6f,p); c.drawCircle(x+4,y+7,1.6f,p);
         } else {
-            stroke(0xFFC3ADCE,1); c.drawLine(x-2,y+21,x-2,y+25,p); c.drawLine(x+2,y+21,x+2,y+25,p);
+            stroke(0xFFCFB8CC,1); c.drawLine(x-2,y+12,x-2,y+16,p); c.drawLine(x+2,y+12,x+2,y+16,p);
         }
         c.restore();
     }
@@ -65,83 +66,80 @@ final class CatRenderer {
         c.scale(1-stretch*.08f+sleep*.08f,1+stretch*.10f-sleep*.16f,80,145);
         if(dragging)c.rotate((float)Math.sin(now/130.0)*4,80,72);
 
-        // Curved, independently swaying tail.
-        path.reset(); path.moveTo(108,132);
-        path.cubicTo(147,142,150,105+sway*7,130+sway*4,107);
-        stroke(OUTLINE,15); c.drawPath(path,p);
-        stroke(LAVENDER,12); c.drawPath(path,p);
-        stroke(0xFFE2D5F8,5); c.drawPath(path,p);
+        // A short curled tail behind the tiny body.
+        path.reset(); path.moveTo(106,137);
+        path.cubicTo(139,146,144,122+sway*5,128+sway*3,123);
+        stroke(OUTLINE,16); c.drawPath(path,p);
+        stroke(LAVENDER,13); c.drawPath(path,p);
+        stroke(0xFFEAE0FA,5); c.drawPath(path,p);
 
-        // Pear-shaped body with a light belly, then back paws.
-        path.reset(); path.moveTo(66,91);
-        path.cubicTo(50,100,46,132,59,143);
-        path.cubicTo(69,151,101,151,113,141);
-        path.cubicTo(122,129,109,98,98,93); path.close(); furPath(c);
-        oval(c,66,111,103,145,0xFFFFFEF9,false);
-        oval(c,49,138,76,151,0xFFF9F3FF,true);
-        oval(c,95,138,121,151,0xFFF9F3FF,true);
+        // Squat mochi body: the head is roughly three times its visible height.
+        path.reset(); path.moveTo(64,106);
+        path.cubicTo(48,115,48,138,60,146);
+        path.cubicTo(70,153,101,153,112,144);
+        path.cubicTo(119,136,115,115,98,106); path.close(); furPath(c);
+        oval(c,66,119,102,147,0xFFFFFEFA,false);
+        oval(c,49,139,76,151,0xFFFFF5F6,true);
+        oval(c,94,139,121,151,0xFFFFF5F6,true);
 
-        // Rounded ears, cheek tufts and forehead form one silhouette.
-        c.save(); c.rotate(sleep*8 + (action==PetMotion.Action.WAVE ? wave*1.6f : 0),80,94);
-        path.reset(); path.moveTo(39,64);
-        path.cubicTo(36,52,34,29,41,28);
-        path.cubicTo(48,28,61,41,66,43);
-        path.cubicTo(75,39,90,40,97,43);
-        path.cubicTo(105,36,116,25,121,30);
-        path.cubicTo(126,36,123,55,124,63);
-        path.cubicTo(137,77,134,85,139,87);
-        path.lineTo(130,93); path.lineTo(134,98); path.lineTo(123,100);
-        path.cubicTo(115,116,50,116,39,101);
-        path.lineTo(28,98); path.lineTo(33,92); path.lineTo(26,87);
-        path.cubicTo(29,83,29,74,39,64); path.close(); furPath(c);
+        // Large round head, soft cheeks, small rounded triangular ears.
+        c.save(); c.rotate(sleep*6 + (action==PetMotion.Action.WAVE ? wave*1.5f : 0),80,103);
+        path.reset(); path.moveTo(33,62);
+        path.cubicTo(31,51,31,35,38,35);
+        path.cubicTo(45,35,52,45,57,48);
+        path.cubicTo(69,43,94,43,106,48);
+        path.cubicTo(112,43,120,33,126,36);
+        path.cubicTo(132,41,130,54,129,63);
+        path.cubicTo(141,73,145,85,141,99);
+        path.cubicTo(137,117,117,124,82,125);
+        path.cubicTo(47,125,24,117,21,99);
+        path.cubicTo(18,85,23,72,33,62); path.close(); furPath(c);
 
-        // Lavender cap and soft inner ears.
-        path.reset(); path.moveTo(42,34); path.cubicTo(43,32,56,43,59,48);
-        path.cubicTo(54,58,47,64,40,66); path.close();
-        fill(LAVENDER); c.drawPath(path,p);
-        path.reset(); path.moveTo(117,35); path.cubicTo(122,39,117,56,118,62);
-        path.lineTo(103,47); path.close(); fill(LAVENDER); c.drawPath(path,p);
-        path.reset(); path.moveTo(43,40); path.lineTo(53,49); path.lineTo(43,57); path.close();
-        fill(0xFFF5B8C9); c.drawPath(path,p);
-        path.reset(); path.moveTo(116,41); path.lineTo(108,49); path.lineTo(117,56); path.close(); c.drawPath(path,p);
-        path.reset(); path.moveTo(70,43); path.cubicTo(74,52,76,51,78,44);
-        path.moveTo(81,43); path.cubicTo(84,54,87,53,89,44);
-        stroke(0xFFD7C7EF,3); c.drawPath(path,p);
+        // Warm blush ears and small lavender forehead tufts.
+        path.reset(); path.moveTo(38,42); path.quadTo(40,38,50,51);
+        path.quadTo(45,57,37,59); path.close();
+        fill(0xFFF4B9C9); c.drawPath(path,p);
+        path.reset(); path.moveTo(123,43); path.quadTo(122,39,113,51);
+        path.quadTo(119,58,126,59); path.close(); c.drawPath(path,p);
+        path.reset(); path.moveTo(72,47); path.quadTo(72,59,78,56);
+        path.quadTo(82,54,82,47);
+        path.moveTo(85,47); path.quadTo(87,58,91,55); path.quadTo(94,53,92,48);
+        stroke(0xFFD9C9EF,3.4f); c.drawPath(path,p);
 
-        // Large violet eyes with iris reflections.
+        // Low-set round eyes, a tiny mouth and broad pink cheeks.
         boolean closed=sleep>.3f || happy>.15f || now%4600<150;
-        for(int eyeX : new int[]{58,105}) {
+        for(int eyeX : new int[]{55,109}) {
             if(closed) {
-                stroke(INK,2.7f);
-                c.drawArc(eyeX-8,73,eyeX+8,83,delighted?200:20,140,false,p);
+                stroke(INK,3f);
+                c.drawArc(eyeX-9,84,eyeX+9,95,delighted?200:20,140,false,p);
             } else {
-                oval(c,eyeX-8,66,eyeX+8,85,INK,false);
-                oval(c,eyeX-5,75,eyeX+5,83,0xFFB393D9,false);
-                oval(c,eyeX-3,68,eyeX+3,81,0xFF51425F,false);
-                fill(Color.WHITE); c.drawCircle(eyeX-3,70,3.1f,p); c.drawCircle(eyeX+3.5f,78.5f,1.5f,p);
+                oval(c,eyeX-10,77,eyeX+10,99,INK,false);
+                oval(c,eyeX-7,87,eyeX+7,97,0xFFB79AD8,false);
+                oval(c,eyeX-4,79,eyeX+4,94,INK,false);
+                fill(Color.WHITE); c.drawCircle(eyeX-3.5f,81.5f,4,p); c.drawCircle(eyeX+4.5f,92,1.9f,p);
             }
         }
-        oval(c,40,86,57,94,0x88F2A6C1,false); oval(c,108,86,125,94,0x88F2A6C1,false);
-        path.reset(); path.moveTo(77,85); path.quadTo(82,82,87,85); path.quadTo(86,88,82,90); path.close();
-        fill(0xFFD18AAA); c.drawPath(path,p);
-        stroke(INK,1.7f); c.drawLine(82,89,82,92,p);
-        c.drawArc(73,88,82,97,0,155,false,p); c.drawArc(82,88,91,97,25,155,false,p);
-        if(action==PetMotion.Action.JUMP) oval(c,79,95,86,101,0xFFE69BB7,false);
-        stroke(0xFFB39EC2,1.3f);
-        c.drawLine(35,84,45,87,p); c.drawLine(33,93,45,92,p);
-        c.drawLine(120,87,131,84,p); c.drawLine(121,92,133,93,p);
+        oval(c,30,99,52,109,0x99F3B4C7,false); oval(c,112,99,134,109,0x99F3B4C7,false);
+        fill(0xAAFFFCF8);c.drawCircle(36,102,1.8f,p);c.drawCircle(118,102,1.8f,p);
+        path.reset(); path.moveTo(78,99); path.quadTo(82,97,86,99); path.quadTo(85,102,82,103); path.close();
+        fill(0xFFD493A9); c.drawPath(path,p);
+        stroke(INK,1.8f); c.drawLine(82,102,82,105,p);
+        c.drawArc(74,101,82,110,0,155,false,p); c.drawArc(82,101,90,110,25,155,false,p);
+        if(action==PetMotion.Action.JUMP) oval(c,79,109,85,114,0xFFECA0B7,false);
+        // Just two short whisker strokes, so the face stays soft at phone size.
+        stroke(0xFFC5B0C9,1.2f);
+        c.drawLine(26,95,35,97,p); c.drawLine(128,97,137,95,p);
         c.restore();
 
-        // Small mint scarf and star charm.
-        fill(0xFF9EDDD0); c.drawRoundRect(60,105,108,112,4,4,p);
-        path.reset(); path.moveTo(96,108); path.lineTo(109,119); path.lineTo(99,121); path.lineTo(91,111); path.close();
-        fill(0xFF82C8BE); c.drawPath(path,p);
-        star(c,82,114,5,0xFFE9C46F);
-        float leftAngle=action==PetMotion.Action.WAVE ? (95+wave*22)*envelope :
-            stretch*140 + happy*18;
-        float rightAngle=-stretch*140-happy*18;
-        arm(c,59,114,leftAngle,action==PetMotion.Action.WAVE || stretch>.5f);
-        arm(c,107,114,rightAngle,stretch>.5f);
+        // Tiny mint collar and golden bell peek out under the cheeks.
+        fill(0xFFADE0D2); c.drawRoundRect(65,121,102,126,3,3,p);
+        oval(c,77,123,87,133,0xFFF3D085,false);
+        stroke(0xFFC29C5C,1);c.drawLine(82,128,82,131,p);
+        float leftAngle=action==PetMotion.Action.WAVE ? (112+wave*24)*envelope :
+            stretch*145 + happy*20;
+        float rightAngle=-stretch*145-happy*20;
+        arm(c,59,128,leftAngle,action==PetMotion.Action.WAVE || stretch>.5f);
+        arm(c,106,128,rightAngle,stretch>.5f);
         c.restore();
 
         // Action accents stay within the same window.
