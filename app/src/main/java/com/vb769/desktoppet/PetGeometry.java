@@ -11,4 +11,16 @@ final class PetGeometry {
     static boolean nearestRight(int x, int width, int left, int right) {
         return (long)x * 2 + width >= (long)left + right;
     }
+    static int restingX(int x, int width, int left, int right, boolean snap) {
+        return snap ? edgeX(nearestRight(x, width, left, right), left, right, width)
+                    : clamp(x, left, right - width);
+    }
+    static int resizedOrigin(int origin, int oldSize, int newSize) {
+        return origin + (oldSize-newSize)/2;
+    }
+    static int bubbleY(int petTop, int petHeight, int bubbleHeight, int top, int bottom, int gap) {
+        int above=petTop-bubbleHeight-gap;
+        return clamp(above >= top ? above : petTop+petHeight+gap, top, bottom-bubbleHeight);
+    }
 }
+

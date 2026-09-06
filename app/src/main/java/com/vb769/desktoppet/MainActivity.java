@@ -16,6 +16,7 @@ public class MainActivity extends Activity {
     private TextView status;
     private SeekBar sizeBar;
     private TextView sizeLabel;
+    private Switch snapSwitch, autoSwitch;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         LinearLayout page = new LinearLayout(this);
@@ -28,6 +29,10 @@ public class MainActivity extends Activity {
         scroll.setFillViewport(true);
         scroll.addView(page);
         setContentView(scroll);
+        scroll.setOnApplyWindowInsetsListener((v, insets) -> {
+            v.setPadding(0, insets.getSystemWindowInsetTop(), 0, insets.getSystemWindowInsetBottom());
+            return insets;
+        });
         TextView title = new TextView(this);
         title.setText("口袋小猫");
         title.setTextSize(32);
@@ -35,7 +40,7 @@ public class MainActivity extends Activity {
         title.setGravity(Gravity.CENTER);
         page.addView(title);
         TextView intro = new TextView(this);
-        intro.setText("把一只小猫带到手机桌面\n拖动松手自动贴边 · 点击打开菜单\n收起后点击小圆钮即可展开");
+        intro.setText("把一只小猫带到手机桌面\n自由摆放 · 短按冒字做动作\n长按选择动作和设置 · 点击圆钮展开");
         intro.setTextSize(17);
         intro.setGravity(Gravity.CENTER);
         intro.setPadding(0, pad, 0, pad);
@@ -72,6 +77,16 @@ public class MainActivity extends Activity {
             @Override public void onStartTrackingTouch(SeekBar bar) {}
             @Override public void onStopTrackingTouch(SeekBar bar) {}
         });
+        snapSwitch = new Switch(this);
+        snapSwitch.setText("自动贴边（默认关闭）");
+        page.addView(snapSwitch);
+        snapSwitch.setOnCheckedChangeListener((button, enabled) ->
+            getSharedPreferences("pet", 0).edit().putBoolean("snap", enabled).apply());
+        autoSwitch = new Switch(this);
+        autoSwitch.setText("偶尔自动冒字和做动作");
+        page.addView(autoSwitch);
+        autoSwitch.setOnCheckedChangeListener((button, enabled) ->
+            getSharedPreferences("pet", 0).edit().putBoolean("autoActions", enabled).apply());
         button(page, "收起到边缘小圆钮", () ->
             getSharedPreferences("pet", 0).edit().putBoolean("folded", true).apply());
         button(page, "展开小猫", () ->
@@ -107,6 +122,8 @@ public class MainActivity extends Activity {
     }
     @Override public void onResume() {
         super.onResume();
+        snapSwitch.setChecked(getSharedPreferences("pet", 0).getBoolean("snap", false));
+        autoSwitch.setChecked(getSharedPreferences("pet", 0).getBoolean("autoActions", true));
         sizeBar.setProgress(PetGeometry.clamp(getSharedPreferences("pet", 0).getInt("size", 80), 56, 120) - 56);
         sizeLabel.setText("小猫大小：" + (sizeBar.getProgress() + 56) + "（默认 80）");
         status.setText(Settings.canDrawOverlays(this) ? "悬浮显示：已允许 ✓" : "悬浮显示：尚未允许");

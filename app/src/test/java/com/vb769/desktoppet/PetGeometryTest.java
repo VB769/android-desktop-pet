@@ -32,4 +32,21 @@ public class PetGeometryTest {
         assertEquals(120, PetGeometry.clamp(999, 56, 120));
         assertEquals(80, PetGeometry.clamp(80, 56, 120));
     }
+    @Test public void centerIsPreservedUnlessSnapWasEnabled() {
+        assertEquals(160, PetGeometry.restingX(160,80,0,400,false));
+        assertEquals(320, PetGeometry.restingX(160,80,0,400,true));
+        assertEquals(73, PetGeometry.restingX(73,80,0,400,false));
+    }
+    @Test public void resizeKeepsCenterAndOnlyClampsOutsideScreen() {
+        assertEquals(140,PetGeometry.resizedOrigin(160,80,120));
+        assertEquals(200,PetGeometry.resizedOrigin(160,80,120)+120/2);
+        assertEquals(0,PetGeometry.restingX(-20,80,0,400,false));
+        assertEquals(320,PetGeometry.restingX(390,80,0,400,false));
+    }
+    @Test public void speechFlipsBelowCatAtScreenTopAndStaysVisible() {
+        assertEquals(250,PetGeometry.bubbleY(300,80,44,24,800,6));
+        assertEquals(110,PetGeometry.bubbleY(24,80,44,24,800,6));
+        assertEquals(650,PetGeometry.bubbleY(700,80,44,24,800,6));
+    }
 }
+
