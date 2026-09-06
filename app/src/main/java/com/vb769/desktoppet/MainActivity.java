@@ -14,6 +14,8 @@ import android.widget.*;
 
 public class MainActivity extends Activity {
     private TextView status;
+    private SeekBar sizeBar;
+    private TextView sizeLabel;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         LinearLayout page = new LinearLayout(this);
@@ -33,7 +35,7 @@ public class MainActivity extends Activity {
         title.setGravity(Gravity.CENTER);
         page.addView(title);
         TextView intro = new TextView(this);
-        intro.setText("把一只小猫带到手机桌面\n拖动移动 · 点击打招呼\n长按小猫可打开控制页面");
+        intro.setText("把一只小猫带到手机桌面\n拖动松手自动贴边 · 点击打开菜单\n收起后点击小圆钮即可展开");
         intro.setTextSize(17);
         intro.setGravity(Gravity.CENTER);
         intro.setPadding(0, pad, 0, pad);
@@ -56,6 +58,28 @@ public class MainActivity extends Activity {
                 requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
             } else summon();
         });
+        sizeLabel = new TextView(this);
+        sizeLabel.setGravity(Gravity.CENTER);
+        page.addView(sizeLabel);
+        sizeBar = new SeekBar(this);
+        sizeBar.setMax(64);
+        page.addView(sizeBar, new LinearLayout.LayoutParams(-1, -2));
+        sizeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar bar, int value, boolean user) {
+                sizeLabel.setText("小猫大小：" + (value + 56) + "（默认 80）");
+                if (user) getSharedPreferences("pet", 0).edit().putInt("size", value + 56).apply();
+            }
+            @Override public void onStartTrackingTouch(SeekBar bar) {}
+            @Override public void onStopTrackingTouch(SeekBar bar) {}
+        });
+        button(page, "收起到边缘小圆钮", () ->
+            getSharedPreferences("pet", 0).edit().putBoolean("folded", true).apply());
+        button(page, "展开小猫", () ->
+            getSharedPreferences("pet", 0).edit().putBoolean("folded", false).apply());
+        button(page, "恢复默认大小", () -> {
+            getSharedPreferences("pet", 0).edit().putInt("size", 80).apply();
+            sizeBar.setProgress(24);
+        });
         button(page, "让小猫休息（关闭）", () -> {
             stopService(new Intent(this, PetService.class));
             Toast.makeText(this, "小猫休息啦", Toast.LENGTH_SHORT).show();
@@ -73,6 +97,7 @@ public class MainActivity extends Activity {
     }
     private void summon() {
         if (!Settings.canDrawOverlays(this)) return;
+        getSharedPreferences("pet", 0).edit().putBoolean("folded", false).apply();
         startForegroundService(new Intent(this, PetService.class));
         Toast.makeText(this, "已召唤，可以返回桌面啦", Toast.LENGTH_SHORT).show();
     }
@@ -82,6 +107,8 @@ public class MainActivity extends Activity {
     }
     @Override public void onResume() {
         super.onResume();
+        sizeBar.setProgress(PetGeometry.clamp(getSharedPreferences("pet", 0).getInt("size", 80), 56, 120) - 56);
+        sizeLabel.setText("小猫大小：" + (sizeBar.getProgress() + 56) + "（默认 80）");
         status.setText(Settings.canDrawOverlays(this) ? "悬浮显示：已允许 ✓" : "悬浮显示：尚未允许");
     }
 }
