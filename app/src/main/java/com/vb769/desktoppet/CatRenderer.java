@@ -29,21 +29,31 @@ final class CatRenderer {
     static int frame(PetMotion.Action action,float progress,long now) {
         switch(action) {
             case WAVE: return 2+((int)(progress*12)%2);
-            case JUMP: return 4+((progress*3)%1f < .22f?0:1);
+            case JUMP: return 4+(jumpPhase(progress)<.22f || jumpPhase(progress)>.88f?0:1);
             case STRETCH: return (progress<.3f || progress>.82f)?6:7;
             case SLEEP: return 8+(int)((now/1100)%2);
             case HAPPY: return 10+(int)((now/350)%2);
             default: return now%4600<160?1:0;
         }
     }
+    private static float jumpPhase(float progress) {
+        return (Math.max(0,Math.min(1,progress))*3)%1f;
+    }
+    static float jumpOffset(float progress) {
+        float phase=jumpPhase(progress);
+        if(phase<=.22f || phase>=.88f)return 0;
+        return (float)Math.sin((phase-.22f)/.66f*Math.PI)*10;
+    }
     void draw(Canvas c,int width,int height,PetMotion.Action action,float progress,long now,boolean dragging) {
         int index=frame(action,Math.max(0,Math.min(.9999f,progress)),now);
         Rect source=atlas.frames[index];
         float scale=128f/atlas.largest;
         float w=source.width()*scale,h=source.height()*scale;
-        float jump=action==PetMotion.Action.JUMP?(float)Math.abs(Math.sin(progress*Math.PI*3))*10:0;
+        float jump=action==PetMotion.Action.JUMP?jumpOffset(progress):0;
         float bob=(float)Math.sin(now/650.0)*.6f;
-        target.set(80-w/2,147-h-jump+bob,80+w/2,147-jump+bob);
+        // Register the feet, not the silhouette center (which moves with the tail).
+        float left=80+(source.left-atlas.anchors[index])*scale;
+        target.set(left,147-h-jump+bob,left+w,147-jump+bob);
         c.save();c.scale(width/160f,height/160f);
         if(dragging)c.rotate((float)Math.sin(now/140.0)*3,80,100);
         else if(action==PetMotion.Action.HAPPY)c.rotate((float)Math.sin(now/200.0)*1.2f,80,145);
@@ -53,6 +63,7 @@ final class CatRenderer {
     private static final class Atlas {
         final Bitmap bitmap;
         final Rect[] frames=new Rect[12];
+        final float[] anchors=new float[12];
         int largest;
         Atlas(Resources resources) {
             BitmapFactory.Options options=new BitmapFactory.Options();
@@ -66,6 +77,8 @@ final class CatRenderer {
             // Separators sit in the authored transparent gutters. The top row's
             // boots reach below one third of the image, so equal thirds clip them.
             int[] rows={0,Math.round(height*377f/1086f),Math.round(height*724f/1086f),height};
+            // Authored feet centers in the 1448px-wide v0.4.1 sheet.
+            int[] feetX={207,565,925,1270,209,547,919,1287,200,563,909,1286};
             for(int i=0;i<12;i++) {
                 int left=(i%4)*width/4,right=(i%4+1)*width/4;
                 int top=rows[i/4],bottom=rows[i/4+1];
@@ -78,7 +91,9 @@ final class CatRenderer {
                 }
                 if(minX>=maxX || minY>=maxY)throw new IllegalStateException("Empty character frame "+i);
                 frames[i]=new Rect(minX,minY,maxX,maxY);
-                largest=Math.max(largest,Math.max(maxX-minX,maxY-minY));
+                anchors[i]=feetX[i]*width/1448f;
+                int span=(int)Math.ceil(2*Math.max(anchors[i]-minX,maxX-anchors[i]));
+                largest=Math.max(largest,Math.max(span,maxY-minY));
             }
         }
     }

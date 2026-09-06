@@ -20,9 +20,15 @@ public class CatRenderTest {
         Paint label=new Paint(Paint.ANTI_ALIAS_FLAG);label.setColor(0xFF51425F);label.setTextSize(18);
         int i=0;
         for(PetMotion.Action action:PetMotion.Action.values()) {
-            for(float phase:new float[]{.28f,.52f}) {
+            Bitmap previous=null;
+            float[][] phases={{.28f,.28f},{.02f,.12f},{.02f,.17f},{.15f,.5f},{.28f,.28f},{.28f,.28f}};
+            long[][] times={{1750,50},{1750,1750},{1750,1750},{1750,1750},{2500,1750},{800,1150}};
+            for(int pose=0;pose<2;pose++) {
+                float phase=phases[action.ordinal()][pose];
+                long now=times[action.ordinal()][pose];
+                assertEquals(action.ordinal()*2+pose,CatRenderer.frame(action,phase,now));
                 Bitmap b=Bitmap.createBitmap(320,320,Bitmap.Config.ARGB_8888);
-                new CatRenderer(org.robolectric.RuntimeEnvironment.getApplication().getResources()).draw(new Canvas(b),320,320,action,phase,1750,false);
+                new CatRenderer(org.robolectric.RuntimeEnvironment.getApplication().getResources()).draw(new Canvas(b),320,320,action,phase,now,false);
                 int filled=0;
                 for(int y=0;y<320;y++)for(int x=0;x<320;x++) {
                     int alpha=Color.alpha(b.getPixel(x,y));
@@ -41,10 +47,15 @@ public class CatRenderTest {
                 int cx=(i%4)*240,cy=(i/4)*320;
                 board.drawBitmap(b,null,new Rect(cx+20,cy+30,cx+220,cy+230),null);
                 board.drawBitmap(b,null,new Rect(cx+80,cy+225,cx+160,cy+305),null);
-                board.drawText(action.name()+" "+phase,cx+12,cy+24,label);
-                try(FileOutputStream out=new FileOutputStream(new File(dir,action.name()+"-"+phase+".png"))){b.compress(Bitmap.CompressFormat.PNG,100,out);}
-                b.recycle();i++;
+                board.drawText(action.name()+" "+pose,cx+12,cy+24,label);
+                try(FileOutputStream out=new FileOutputStream(new File(dir,action.name()+"-"+pose+".png"))){b.compress(Bitmap.CompressFormat.PNG,100,out);}
+                if(previous!=null) {
+                    assertFalse("Both poses must differ: "+action,previous.sameAs(b));
+                    previous.recycle();
+                }
+                previous=b;i++;
             }
+            if(previous!=null)previous.recycle();
         }
         try(FileOutputStream out=new FileOutputStream(new File(dir,"action-sheet.png"))){sheet.compress(Bitmap.CompressFormat.PNG,100,out);}
         sheet.recycle();

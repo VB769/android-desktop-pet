@@ -10,4 +10,16 @@ public class SpriteFrameTest {
                 assertTrue(frame<a.ordinal()*2+2);
             }
     }
+    @Test public void crouchNeverFloatsAndEveryJumpReturnsToGround() {
+        for(int step=0;step<=1000;step++) {
+            float progress=step/1000f;
+            float height=CatRenderer.jumpOffset(progress);
+            assertTrue(height>=0 && height<=10.001f);
+            if(CatRenderer.frame(PetMotion.Action.JUMP,progress,0)==4)
+                assertEquals("Crouching feet must stay on the ground",0,height,0.001f);
+        }
+        assertEquals(0,CatRenderer.jumpOffset(0),0.001f);
+        assertEquals(0,CatRenderer.jumpOffset(1),0.001f);
+        assertTrue(CatRenderer.jumpOffset(.18f)>9);
+    }
 }
