@@ -226,7 +226,7 @@ public class PetService extends Service {
         stopForeground(STOP_FOREGROUND_REMOVE);super.onDestroy();
     }
     private class CatView extends View {
-        private final CatRenderer renderer=new CatRenderer();
+        private final CatRenderer renderer=new CatRenderer(getResources());
         private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
         float downX,downY;int startX,startY;boolean dragging,holding,touching;
         final Runnable longPress=()->{if(touching&&!dragging){holding=true;showMenu();}};
