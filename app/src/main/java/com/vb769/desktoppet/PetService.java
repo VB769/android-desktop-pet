@@ -62,10 +62,10 @@ public class PetService extends Service {
             PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent stop=PendingIntent.getService(this,1,new Intent(this,PetService.class).setAction("STOP"),
             PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification n=new Notification.Builder(this,"pet").setSmallIcon(R.drawable.ic_cat)
-            .setContentTitle("口袋小猫正在陪你").setContentText("短按互动 · 长按菜单 · 自由拖动")
+        Notification n=new Notification.Builder(this,"pet").setSmallIcon(R.drawable.ic_companion)
+            .setContentTitle("口袋小凪正在陪你").setContentText("短按互动 · 长按菜单 · 自由拖动")
             .setContentIntent(open).setOngoing(true)
-            .addAction(new Notification.Action.Builder(null,"关闭小猫",stop).build()).build();
+            .addAction(new Notification.Action.Builder(null,"关闭小凪",stop).build()).build();
         if(Build.VERSION.SDK_INT>=34)startForeground(1,n,ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
         else startForeground(1,n);
         if(cat==null) {
@@ -139,8 +139,8 @@ public class PetService extends Service {
         nextAuto=SystemClock.uptimeMillis()+25000;
     }
     private void updateDescription() {
-        cat.setContentDescription(folded?"展开口袋小猫，长按菜单":
-            "口袋小猫，短按冒字并做动作，长按菜单，可自由拖动");
+        cat.setContentDescription(folded?"展开口袋小凪，长按菜单":
+            "口袋小凪，短按冒字并做动作，长按菜单，可自由拖动");
     }
     private void updateWindow() {
         if(cat==null||!cat.isAttachedToWindow())return;
@@ -194,11 +194,11 @@ public class PetService extends Service {
     private void showMenu() {
         if(!Settings.canDrawOverlays(this)){stopSelf();return;}
         dismissMenu();removeBubble();
-        String[] choices={"挥爪打招呼","跳一跳","伸懒腰","打个盹","开心摇尾",
-            "更小一点","更大一点",folded?"展开小猫":"收起小猫",
-            snap?"关闭自动贴边（自由放置）":"开启自动贴边","完整设置","关闭小猫"};
+        String[] choices={"挥手打招呼","跳一跳","伸懒腰","打个盹","开心欢呼",
+            "更小一点","更大一点",folded?"展开小凪":"收起小凪",
+            snap?"关闭自动贴边（自由放置）":"开启自动贴边","完整设置","关闭小凪"};
         AlertDialog dialog=new AlertDialog.Builder(new ContextThemeWrapper(this,android.R.style.Theme_Material_Light_Dialog_Alert))
-            .setTitle("口袋小猫 · 动作与设置")
+            .setTitle("口袋小凪 · 动作与设置")
             .setItems(choices,(d,which)->{
                 if(which<5) {
                     if(folded)prefs.edit().putBoolean("folded",false).apply();
@@ -228,9 +228,10 @@ public class PetService extends Service {
     private class CatView extends View {
         private final CatRenderer renderer=new CatRenderer(getResources());
         private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final android.graphics.drawable.Drawable ribbon=getDrawable(R.drawable.ic_companion).mutate();
         float downX,downY;int startX,startY;boolean dragging,holding,touching;
         final Runnable longPress=()->{if(touching&&!dragging){holding=true;showMenu();}};
-        CatView(){super(PetService.this);setClickable(true);}
+        CatView(){super(PetService.this);setClickable(true);ribbon.setTint(Color.WHITE);ribbon.setBounds(7,11,33,37);}
         void cancelTouch(){handler.removeCallbacks(longPress);touching=false;}
         @Override public boolean performClick() {
             super.performClick();
@@ -243,8 +244,8 @@ public class PetService extends Service {
             if(folded) {
                 c.save();c.scale(getWidth()/40f,getHeight()/48f);
                 paint.setColor(0xEE8875B9);c.drawRoundRect(0,4,40,44,19,19,paint);
-                paint.setColor(Color.WHITE);c.drawOval(14,24,28,35,paint);
-                c.drawCircle(11,21,3,paint);c.drawCircle(18,17,3,paint);c.drawCircle(26,18,3,paint);c.drawCircle(31,23,3,paint);
+                // The companion's ribbon replaces the old paw symbol.
+                ribbon.draw(c);
                 c.restore();
             }else{
                 long now=SystemClock.uptimeMillis();

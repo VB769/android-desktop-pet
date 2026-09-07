@@ -3,7 +3,7 @@ package com.vb769.desktoppet;
 import android.content.res.Resources;
 import android.graphics.*;
 
-/** Reference-inspired chibi character. Chroma key is applied once on resource load. */
+/** Original human chibi companion Xiaonagi. Chroma key is applied once on resource load. */
 final class CatRenderer {
     private static Atlas shared;
     private final Atlas atlas;
@@ -51,7 +51,7 @@ final class CatRenderer {
         float w=source.width()*scale,h=source.height()*scale;
         float jump=action==PetMotion.Action.JUMP?jumpOffset(progress):0;
         float bob=(float)Math.sin(now/650.0)*.6f;
-        // Register the feet, not the silhouette center (which moves with the tail).
+        // Register the feet, not the silhouette center (which moves with the arms).
         float left=80+(source.left-atlas.anchors[index])*scale;
         target.set(left,147-h-jump+bob,left+w,147-jump+bob);
         c.save();c.scale(width/160f,height/160f);
@@ -68,17 +68,18 @@ final class CatRenderer {
         Atlas(Resources resources) {
             BitmapFactory.Options options=new BitmapFactory.Options();
             options.inScaled=false;
-            Bitmap raw=BitmapFactory.decodeResource(resources,R.drawable.anime_cat_sheet,options);
-            if(raw==null)throw new IllegalStateException("Missing anime character resource");
+            Bitmap raw=BitmapFactory.decodeResource(resources,R.drawable.xiaonagi_sheet,options);
+            if(raw==null)throw new IllegalStateException("Missing Xiaonagi character resource");
             int width=raw.getWidth(),height=raw.getHeight();
             int[] pixels=new int[width*height];raw.getPixels(pixels,0,width,0,0,width,height);raw.recycle();
             for(int i=0;i<pixels.length;i++)pixels[i]=keyPixel(pixels[i]);
             bitmap=Bitmap.createBitmap(pixels,width,height,Bitmap.Config.ARGB_8888);
             // Separators sit in the authored transparent gutters. The top row's
             // boots reach below one third of the image, so equal thirds clip them.
-            int[] rows={0,Math.round(height*377f/1086f),Math.round(height*724f/1086f),height};
-            // Authored feet centers in the 1448px-wide v0.4.1 sheet.
-            int[] feetX={207,565,925,1270,209,547,919,1287,200,563,909,1286};
+            int[] rows={0,Math.round(height*374f/1086f),Math.round(height*738f/1086f),height};
+            // Authored feet centers in the 1448px-wide Xiaonagi sheet.
+            // Airborne pose uses the midpoint of BOTH shoes, not its lower shoe.
+            int[] feetX={192,545,893,1257,192,543,900,1256,189,548,903,1260};
             for(int i=0;i<12;i++) {
                 int left=(i%4)*width/4,right=(i%4+1)*width/4;
                 int top=rows[i/4],bottom=rows[i/4+1];

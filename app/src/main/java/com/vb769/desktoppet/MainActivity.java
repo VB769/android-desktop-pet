@@ -34,13 +34,13 @@ public class MainActivity extends Activity {
             return insets;
         });
         TextView title = new TextView(this);
-        title.setText("口袋小猫");
+        title.setText("口袋小凪");
         title.setTextSize(32);
         title.setTextColor(Color.rgb(79, 59, 135));
         title.setGravity(Gravity.CENTER);
         page.addView(title);
         TextView intro = new TextView(this);
-        intro.setText("把一只小猫带到手机桌面\n自由摆放 · 短按冒字做动作\n长按选择动作和设置 · 点击圆钮展开");
+        intro.setText("把小凪带到手机桌面\n自由摆放 · 短按冒字做动作\n长按选择动作和设置 · 点击圆钮展开");
         intro.setTextSize(17);
         intro.setGravity(Gravity.CENTER);
         intro.setPadding(0, pad, 0, pad);
@@ -51,12 +51,12 @@ public class MainActivity extends Activity {
         button(page, "① 允许悬浮显示", () -> {
             try { startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()))); }
             catch (android.content.ActivityNotFoundException e) {
-                Toast.makeText(this, "请在系统设置中搜索悬浮窗，允许口袋小猫", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "请在系统设置中搜索悬浮窗，允许口袋小凪", Toast.LENGTH_LONG).show();
             }
         });
-        button(page, "② 召唤小猫", () -> {
+        button(page, "② 召唤小凪", () -> {
             if (!Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, "请先允许悬浮显示，再回来召唤小猫", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "请先允许悬浮显示，再回来召唤小凪", Toast.LENGTH_LONG).show();
                 return;
             }
             if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
         page.addView(sizeBar, new LinearLayout.LayoutParams(-1, -2));
         sizeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar bar, int value, boolean user) {
-                sizeLabel.setText("小猫大小：" + (value + 56) + "（默认 80）");
+                sizeLabel.setText("小凪大小：" + (value + 56) + "（默认 80）");
                 if (user) getSharedPreferences("pet", 0).edit().putInt("size", value + 56).apply();
             }
             @Override public void onStartTrackingTouch(SeekBar bar) {}
@@ -89,18 +89,18 @@ public class MainActivity extends Activity {
             getSharedPreferences("pet", 0).edit().putBoolean("autoActions", enabled).apply());
         button(page, "收起到边缘小圆钮", () ->
             getSharedPreferences("pet", 0).edit().putBoolean("folded", true).apply());
-        button(page, "展开小猫", () ->
+        button(page, "展开小凪", () ->
             getSharedPreferences("pet", 0).edit().putBoolean("folded", false).apply());
         button(page, "恢复默认大小", () -> {
             getSharedPreferences("pet", 0).edit().putInt("size", 80).apply();
             sizeBar.setProgress(24);
         });
-        button(page, "让小猫休息（关闭）", () -> {
+        button(page, "让小凪休息（关闭）", () -> {
             stopService(new Intent(this, PetService.class));
-            Toast.makeText(this, "小猫休息啦", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "小凪休息啦", Toast.LENGTH_SHORT).show();
         });
         TextView note = new TextView(this);
-        note.setText("启动后按手机主页键，就能看到小猫。\n不需要登录；本应用不申请联网权限。\n若小猫被系统关闭，可重新打开本应用召唤。");
+        note.setText("启动后按手机主页键，就能看到小凪。\n不需要登录；本应用不申请联网权限。\n若小凪被系统关闭，可重新打开本应用召唤。");
         note.setGravity(Gravity.CENTER);
         note.setPadding(0, pad, 0, 0);
         page.addView(note);
@@ -125,7 +125,7 @@ public class MainActivity extends Activity {
         snapSwitch.setChecked(getSharedPreferences("pet", 0).getBoolean("snap", false));
         autoSwitch.setChecked(getSharedPreferences("pet", 0).getBoolean("autoActions", true));
         sizeBar.setProgress(PetGeometry.clamp(getSharedPreferences("pet", 0).getInt("size", 80), 56, 120) - 56);
-        sizeLabel.setText("小猫大小：" + (sizeBar.getProgress() + 56) + "（默认 80）");
+        sizeLabel.setText("小凪大小：" + (sizeBar.getProgress() + 56) + "（默认 80）");
         status.setText(Settings.canDrawOverlays(this) ? "悬浮显示：已允许 ✓" : "悬浮显示：尚未允许");
     }
 }
